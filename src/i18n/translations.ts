@@ -72,6 +72,15 @@ export const translations = {
       miss: "Bỏ lỡ",
       goal: "Hạn chót",
     },
+    settings: {
+      title: "Cài đặt",
+      theme: "Giao diện",
+      themeLight: "Sáng",
+      themeDark: "Tối",
+      language: "Ngôn ngữ",
+      languageVi: "Tiếng Việt",
+      languageEn: "English",
+    },
   },
   en: {
     common: {
@@ -141,6 +150,15 @@ export const translations = {
       preserve: "Preserve",
       miss: "Miss",
       goal: "Deadline",
+    },
+    settings: {
+      title: "Settings",
+      theme: "Appearance",
+      themeLight: "Light",
+      themeDark: "Dark",
+      language: "Language",
+      languageVi: "Vietnamese",
+      languageEn: "English",
     },
   },
 } as const;

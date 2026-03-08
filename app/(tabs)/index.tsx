@@ -64,7 +64,7 @@ export default function DashboardScreen() {
           </Text>
           <View className="ml-auto rounded-full bg-amber-500/20 px-3 py-1">
             <Text className="text-xs font-semibold text-amber-400">
-              Phase 2
+              Phase 3
             </Text>
           </View>
         </View>

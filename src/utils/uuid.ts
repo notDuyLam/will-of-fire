@@ -3,9 +3,12 @@
  * Trên web/Node có sẵn crypto.randomUUID(); React Native không có → dùng fallback.
  */
 export function randomUUID(): string {
-  const c = typeof globalThis !== "undefined" && globalThis.crypto;
-  if (typeof c?.randomUUID === "function") {
-    return c.randomUUID();
+  const cryptoObj =
+    typeof globalThis !== "undefined" && globalThis.crypto
+      ? globalThis.crypto
+      : undefined;
+  if (typeof cryptoObj?.randomUUID === "function") {
+    return cryptoObj.randomUUID();
   }
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (ch) => {
     const r = (Math.random() * 16) | 0;

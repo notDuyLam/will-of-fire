@@ -1,12 +1,13 @@
 import "../global.css";
 import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { initializeDatabase } from "../src/db/migrate";
 import { verifyInstallation } from "nativewind";
 import { ThemeProvider } from "../src/contexts/ThemeContext";
 import { I18nProvider } from "../src/i18n/context";
+import { ThemeAwareBars } from "../src/components/ThemeAwareBars";
 
 /**
  * Root Layout: Thiết lập Providers và navigation container chính.
@@ -63,17 +64,19 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider>
-      <I18nProvider>
-        <StatusBar style="dark" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: "transparent" },
-            animation: "slide_from_right",
-          }}
-        />
-      </I18nProvider>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <ThemeAwareBars />
+        <I18nProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: "transparent" },
+              animation: "slide_from_right",
+            }}
+          />
+        </I18nProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }

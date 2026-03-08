@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { useColorScheme, View } from "react-native";
+import { useColorScheme, View, Appearance } from "react-native";
 
 type Theme = "light" | "dark";
 
@@ -12,9 +12,21 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const system = useColorScheme();
+  const systemFromHook = useColorScheme();
+  // Khởi tạo system từ Appearance.getColorScheme() (đồng bộ) để render đầu đã đúng theme.
+  // useColorScheme() cập nhật sau nên có thể null/trễ ở frame đầu.
+  const [system, setSystem] = useState<"light" | "dark" | null>(() => {
+    const v = Appearance.getColorScheme();
+    return v === "dark" || v === "light" ? v : null;
+  });
+  useEffect(() => {
+    const v = systemFromHook;
+    if (v === "dark" || v === "light") setSystem(v);
+  }, [systemFromHook]);
+
   const [override, setOverride] = useState<Theme | null>(null);
-  const theme: Theme = override ?? (system === "dark" ? "dark" : "light");
+  const theme: Theme =
+    override ?? (system === "light" ? "light" : "dark");
   const isDark = theme === "dark";
 
   useEffect(() => {
