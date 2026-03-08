@@ -1,3 +1,5 @@
+import { randomUUID } from "../utils/uuid";
+
 /**
  * Web stub: SQLite không chạy trên web (expo-sqlite cần WASM).
  * Export db giả để app không crash; dữ liệu trên web sẽ rỗng.
@@ -17,7 +19,7 @@ const stubDb = {
     insert: (_table: unknown) => ({
         values: (data: Record<string, unknown>) => ({
             returning: () => ({
-                get: () => ({ ...data, id: (data as { id?: string }).id ?? crypto.randomUUID() }),
+                get: () => ({ ...data, id: (data as { id?: string }).id ?? randomUUID() }),
             }),
         }),
     }),

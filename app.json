@@ -36,7 +36,8 @@
         {
           "color": "#FF5733"
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ]
   }
 }

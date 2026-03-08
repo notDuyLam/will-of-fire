@@ -5,16 +5,22 @@ import { pacts, type NewPact, type Pact } from "../schema";
 /**
  * Tạo một Pact mới và lưu vào database.
  *
- * @param data - Dữ liệu Pact mới (name, frequency, goalName, targetCount, etc.)
+ * @param data - Dữ liệu Pact mới (name, frequency, goalName, goalDeadline, scheduleStartDate, etc.)
  * @returns Pact vừa tạo (với id đã được generate)
  */
 export function createPact(data: NewPact): Pact {
     const now = new Date().toISOString();
+    // goalName optional; pass '' for backward compat with DB that has goal_name NOT NULL
+    const goalName = data.goalName ?? '';
+    // targetCount optional; pass 0 for backward compat with DB that has target_count NOT NULL
+    const targetCount = data.targetCount ?? 0;
 
     const result = db
         .insert(pacts)
         .values({
             ...data,
+            goalName,
+            targetCount,
             createdAt: now,
             updatedAt: now,
         })
@@ -74,12 +80,11 @@ export function updatePact(
     id: string,
     data: Partial<Omit<NewPact, "id">>
 ): Pact {
+    const setData = { ...data, updatedAt: new Date().toISOString() };
+    if ('goalName' in data) setData.goalName = data.goalName ?? '';
     const result = db
         .update(pacts)
-        .set({
-            ...data,
-            updatedAt: new Date().toISOString(),
-        })
+        .set(setData)
         .where(eq(pacts.id, id))
         .returning()
         .get();

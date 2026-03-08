@@ -4,15 +4,15 @@ import { milestones, type NewMilestone, type Milestone } from "../schema";
 
 /**
  * Tạo một Milestone mới khi người dùng chọn "Tiến hóa" (Evolve) Pact.
- * Ghi lại Goal vừa hoàn thành trước khi reset Progress cho Goal mới.
+ * Ghi lại Goal vừa hoàn thành (goalName + goalDeadline) trước khi đặt mục tiêu mới.
  *
- * @param data - pactId, goalName, targetCount
+ * @param data - pactId, goalName, goalDeadline (optional)
  * @returns Milestone vừa tạo
  */
 export function createMilestone(data: NewMilestone): Milestone {
     const result = db
         .insert(milestones)
-        .values(data)
+        .values({ ...data, targetCount: 0 })
         .returning()
         .get();
 

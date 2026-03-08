@@ -24,3 +24,9 @@ export {
     getMilestonesForPact,
     getTotalMilestoneCount,
 } from "./milestoneQueries";
+
+export {
+    logActionAndUpdatePact,
+    type LogActionType,
+    type LogActionResult,
+} from "../actions";

@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator } from "react-native";
 import { initializeDatabase } from "../src/db/migrate";
 import { verifyInstallation } from "nativewind";
+import { ThemeProvider } from "../src/contexts/ThemeContext";
+import { I18nProvider } from "../src/i18n/context";
 
 /**
  * Root Layout: Thiết lập Providers và navigation container chính.
@@ -36,23 +38,22 @@ export default function RootLayout() {
     setup();
   }, []);
 
-  // Loading screen trong lúc khởi tạo DB
   if (!dbReady) {
     return (
-      <View className="flex-1 items-center justify-center bg-slate-900">
+      <View className="flex-1 items-center justify-center bg-screen dark:bg-screen-dark">
         {error ? (
           <>
             <Text className="mb-2 text-lg font-bold text-red-400">
               ❌ Database Error
             </Text>
-            <Text className="px-8 text-center text-sm text-slate-400">
+            <Text className="px-8 text-center text-sm text-muted dark:text-muted-dark">
               {error}
             </Text>
           </>
         ) : (
           <>
             <ActivityIndicator size="large" color="#F97316" />
-            <Text className="mt-4 text-slate-400">
+            <Text className="mt-4 text-muted dark:text-muted-dark">
               Initializing database...
             </Text>
           </>
@@ -62,15 +63,17 @@ export default function RootLayout() {
   }
 
   return (
-    <>
-      <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: "#0F172A" },
-          animation: "slide_from_right",
-        }}
-      />
-    </>
+    <ThemeProvider>
+      <I18nProvider>
+        <StatusBar style="dark" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: "transparent" },
+            animation: "slide_from_right",
+          }}
+        />
+      </I18nProvider>
+    </ThemeProvider>
   );
 }

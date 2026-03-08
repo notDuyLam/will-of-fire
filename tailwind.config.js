@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: "class",
   content: [
     "./app/**/*.{js,jsx,ts,tsx}",
     "./src/**/*.{js,jsx,ts,tsx}",
@@ -8,6 +9,27 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Semantic: dùng bg-screen, text-primary để tự đổi theo dark/light
+        screen: {
+          DEFAULT: "#f8fafc",
+          dark: "#0f172a",
+        },
+        primary: {
+          DEFAULT: "#0f172a",
+          dark: "#f8fafc",
+        },
+        muted: {
+          DEFAULT: "#64748b",
+          dark: "#94a3b8",
+        },
+        card: {
+          DEFAULT: "#f1f5f9",
+          dark: "#1e293b",
+        },
+        border: {
+          DEFAULT: "#e2e8f0",
+          dark: "#334155",
+        },
         // Will of Fire custom palette
         fire: {
           50: '#FFF7ED',

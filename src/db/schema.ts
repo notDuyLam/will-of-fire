@@ -1,60 +1,61 @@
 import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
+import { randomUUID } from "../utils/uuid";
+
+/**
+ * Frequency: DAILY | EVERY_2_DAYS | EVERY_3_DAYS | EVERY_X_DAYS | WEEKLY | MONTHLY
+ * Với EVERY_X_DAYS dùng thêm interval_days.
+ */
+export const PACT_FREQUENCIES = [
+  "DAILY",
+  "EVERY_2_DAYS",
+  "EVERY_3_DAYS",
+  "EVERY_X_DAYS",
+  "WEEKLY",
+  "MONTHLY",
+] as const;
+export type PactFrequency = (typeof PACT_FREQUENCIES)[number];
 
 /**
  * Bảng `pacts` — Thông tin Khế Ước
- * Lưu trữ định nghĩa và trạng thái hiện tại của mỗi Pact.
- *
- * Các trạng thái (status): 'ACTIVE' | 'COMPLETED' | 'FAILED'
- * Frequency format: 'DAILY' | 'WEEKLY:MON,WED,FRI' | 'INTERVAL:3'
+ * Mục tiêu theo deadline (goal_deadline); progress tính từ tần suất và số lần COMPLETE.
  */
 export const pacts = sqliteTable("pacts", {
     id: text("id")
         .primaryKey()
-        .$defaultFn(() => crypto.randomUUID()),
+        .$defaultFn(() => randomUUID()),
 
-    /** Tên Khế Ước */
     name: text("name").notNull(),
-
-    /** Mô tả chi tiết */
     description: text("description"),
 
-    /**
-     * Tần suất thực hiện
-     * VD: "DAILY", "WEEKLY:MON,WED,FRI", "INTERVAL:3"
-     */
+    /** DAILY | EVERY_2_DAYS | EVERY_3_DAYS | EVERY_X_DAYS | WEEKLY | MONTHLY */
     frequency: text("frequency").notNull(),
 
-    /** Mục tiêu hiện tại (Goal name) */
-    goalName: text("goal_name").notNull(),
+    /** Số ngày chu kỳ khi frequency = EVERY_X_DAYS */
+    intervalDays: integer("interval_days"),
 
-    /** Định mức để đạt 100% Progress */
-    targetCount: integer("target_count").notNull(),
+    /** Ngày đầu tiên pact đến hạn (YYYY-MM-DD); với DAILY có thể = created_at */
+    scheduleStartDate: text("schedule_start_date"),
 
-    /** Số lần đã thực hiện cho Goal hiện tại */
+    /** Tên mục tiêu (tùy chọn; thói quen lặp lại có thể không cần goal) */
+    goalName: text("goal_name"),
+
+    /** Hạn chót đạt mục tiêu (YYYY-MM-DD); chỉ khi có goal */
+    goalDeadline: text("goal_deadline"),
+
+    /** @deprecated Giữ cho tương thích; progress mới tính từ deadline + frequency */
+    targetCount: integer("target_count"),
+    /** @deprecated Giữ cho tương thích */
     currentProgress: integer("current_progress").notNull().default(0),
 
-    /** Tổng Lửa (Fire) kiếm được từ lúc tạo */
     totalFire: integer("total_fire").notNull().default(0),
-
-    /** Chuỗi Streak hiện tại */
     currentStreak: integer("current_streak").notNull().default(0),
-
-    /** Kỷ lục Streak cao nhất */
     highestStreak: integer("highest_streak").notNull().default(0),
-
-    /** Trạng thái: 'ACTIVE' | 'COMPLETED' | 'FAILED' */
     status: text("status").notNull().default("ACTIVE"),
-
-    /** Giờ nhắc nhở (VD: "07:30") */
     reminderTime: text("reminder_time").default("07:30"),
-
-    /** Thời điểm tạo (ISO string) */
     createdAt: text("created_at")
         .notNull()
         .default(sql`(datetime('now'))`),
-
-    /** Thời điểm cập nhật lần cuối (ISO string) */
     updatedAt: text("updated_at")
         .notNull()
         .default(sql`(datetime('now'))`),
@@ -70,7 +71,7 @@ export const pactLogs = sqliteTable(
     {
         id: text("id")
             .primaryKey()
-            .$defaultFn(() => crypto.randomUUID()),
+            .$defaultFn(() => randomUUID()),
 
         /** Foreign key -> pacts.id */
         pactId: text("pact_id")
@@ -98,26 +99,20 @@ export const pactLogs = sqliteTable(
 );
 
 /**
- * Bảng `milestones` — Cột mốc Tiến hóa
- * Lưu lại các Goal đã hoàn thành khi người dùng chọn "Tiến hóa" (Evolve) Pact.
+ * Bảng `milestones` — Cột mốc Tiến hóa (Goal đã hoàn thành trước deadline)
  */
 export const milestones = sqliteTable("milestones", {
     id: text("id")
         .primaryKey()
-        .$defaultFn(() => crypto.randomUUID()),
-
-    /** Foreign key -> pacts.id */
+        .$defaultFn(() => randomUUID()),
     pactId: text("pact_id")
         .notNull()
         .references(() => pacts.id),
-
-    /** Tên mục tiêu đã đạt */
     goalName: text("goal_name").notNull(),
-
-    /** Định mức của mục tiêu đó */
-    targetCount: integer("target_count").notNull(),
-
-    /** Thời điểm hoàn thành (ISO string) */
+    /** Deadline của goal đã đạt (YYYY-MM-DD) */
+    goalDeadline: text("goal_deadline"),
+    /** @deprecated Giữ cho tương thích DB cũ (NOT NULL); mới dùng goal_deadline */
+    targetCount: integer("target_count").default(0),
     achievedAt: text("achieved_at")
         .notNull()
         .default(sql`(datetime('now'))`),
