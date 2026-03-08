@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator } from "react-native";
 import { initializeDatabase } from "../src/db/migrate";
+import { verifyInstallation } from "nativewind";
 
 /**
  * Root Layout: Thiết lập Providers và navigation container chính.
@@ -14,6 +15,9 @@ export default function RootLayout() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Debug NativeWind — kiểm tra installation
+    verifyInstallation();
+
     /**
      * Khởi tạo SQLite database và tạo các bảng cần thiết.
      * Chạy 1 lần duy nhất khi app mount.
