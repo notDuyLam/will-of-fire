@@ -20,6 +20,7 @@ import {
   createMilestone,
 } from "../../src/db/queries";
 import type { Pact, PactLog } from "../../src/db/schema";
+import { usePactStore } from "../../src/store/usePactStore";
 import { isScheduledOn, getProgressPercentage } from "../../src/utils/calendarRules";
 import { PactCalendar } from "../../src/components/PactCalendar";
 import { DatePickerField } from "../../src/components/DatePickerField";
@@ -143,6 +144,7 @@ export default function PactDetailScreen() {
       return;
     }
     load();
+    usePactStore.getState().fetchActivePacts();
   };
 
   const handlePreserve = () => {
@@ -152,6 +154,7 @@ export default function PactDetailScreen() {
       return;
     }
     load();
+    usePactStore.getState().fetchActivePacts();
   };
 
   const handleMarkMiss = () => {
@@ -166,6 +169,7 @@ export default function PactDetailScreen() {
           onPress: () => {
             logActionAndUpdatePact(pact.id, today, "MISS");
             load();
+            usePactStore.getState().fetchActivePacts();
           },
         },
       ]
@@ -174,6 +178,7 @@ export default function PactDetailScreen() {
 
   const handleArchive = () => {
     updatePact(pact.id, { status: "COMPLETED" });
+    usePactStore.getState().fetchActivePacts();
     setEvolutionModal(false);
     router.back();
   };
@@ -197,6 +202,7 @@ export default function PactDetailScreen() {
     setEvolveGoalName("");
     setEvolveDeadline(null);
     load();
+    usePactStore.getState().fetchActivePacts();
   };
 
   return (

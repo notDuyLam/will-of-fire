@@ -45,3 +45,30 @@ export function getTotalMilestoneCount(): number {
     const result = db.select().from(milestones).all();
     return result.length;
 }
+
+/**
+ * Lấy toàn bộ Milestones toàn app (không giới hạn).
+ * Dùng cho backup/export dữ liệu.
+ */
+export function getAllMilestonesForExport(): Milestone[] {
+  return db
+    .select()
+    .from(milestones)
+    .orderBy(desc(milestones.achievedAt))
+    .all();
+}
+
+/**
+ * Lấy toàn bộ Milestones toàn app, sắp xếp theo achievedAt mới nhất.
+ * Dùng cho Reports: danh sách goal đã đạt.
+ *
+ * @param limit - Số lượng tối đa (mặc định 20)
+ */
+export function getAllMilestones(limit: number = 20): Milestone[] {
+    return db
+        .select()
+        .from(milestones)
+        .orderBy(desc(milestones.achievedAt))
+        .limit(limit)
+        .all();
+}

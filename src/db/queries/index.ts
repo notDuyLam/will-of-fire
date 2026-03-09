@@ -17,12 +17,16 @@ export {
     getLogsForPact,
     getLogForDate,
     getRecentLogs,
+    getLogsInDateRange,
+    getAllLogs,
 } from "./logQueries";
 
 export {
     createMilestone,
     getMilestonesForPact,
     getTotalMilestoneCount,
+    getAllMilestones,
+    getAllMilestonesForExport,
 } from "./milestoneQueries";
 
 export {

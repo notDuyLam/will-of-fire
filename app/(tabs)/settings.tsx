@@ -1,8 +1,15 @@
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView, Alert } from "react-native";
+import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "../../src/i18n/context";
 import { useTheme } from "../../src/contexts/ThemeContext";
 import { Settings as SettingsIcon } from "lucide-react-native";
+import { usePactStore } from "../../src/store/usePactStore";
+import {
+  saveAndShareJsonBackup,
+  saveAndShareCsvSummary,
+  pickAndImportBackup,
+} from "../../src/db/backup";
 
 /**
  * Màn hình Cài đặt: đổi theme (sáng/tối), đổi ngôn ngữ.
@@ -10,6 +17,8 @@ import { Settings as SettingsIcon } from "lucide-react-native";
 export default function SettingsScreen() {
   const { t, locale, setLocale } = useTranslation();
   const { theme, setTheme, isDark } = useTheme();
+  const { fetchActivePacts } = usePactStore();
+  const [isWorking, setIsWorking] = useState(false);
 
   const bg = isDark ? "bg-slate-900" : "bg-slate-50";
   const card = isDark ? "bg-slate-800 border-slate-600" : "bg-white border-slate-200";
@@ -86,6 +95,115 @@ export default function SettingsScreen() {
               {t("settings.languageEn")}
             </Text>
           </Pressable>
+        </View>
+
+        <Text className={`mb-2 text-sm font-semibold ${muted}`}>
+          {t("settings.exportTitle")}
+        </Text>
+        <View className={`mb-6 rounded-xl border p-3 ${card}`}>
+          <Text className={`mb-3 text-xs ${muted}`}>
+            {t("settings.exportDescription")}
+          </Text>
+          <View className="flex-row gap-3">
+            <Pressable
+              disabled={isWorking}
+              onPress={async () => {
+                if (isWorking) return;
+                setIsWorking(true);
+                try {
+                  await saveAndShareJsonBackup(locale);
+                } catch {
+                  Alert.alert(t("common.error"), t("settings.importError"));
+                } finally {
+                  setIsWorking(false);
+                }
+              }}
+              className={`flex-1 rounded-lg py-3 ${
+                isWorking ? "bg-slate-400" : btnPrimary
+              }`}
+            >
+              <Text className="text-center text-sm font-semibold text-white">
+                {t("settings.exportJsonButton")}
+              </Text>
+            </Pressable>
+            <Pressable
+              disabled={isWorking}
+              onPress={async () => {
+                if (isWorking) return;
+                setIsWorking(true);
+                try {
+                  await saveAndShareCsvSummary();
+                } catch {
+                  Alert.alert(t("common.error"), t("settings.importError"));
+                } finally {
+                  setIsWorking(false);
+                }
+              }}
+              className={`flex-1 rounded-lg py-3 ${
+                isWorking ? "bg-slate-400" : btnSecondary
+              }`}
+            >
+              <Text
+                className={`text-center text-sm font-semibold ${
+                  isDark ? "text-white" : "text-slate-900"
+                }`}
+              >
+                {t("settings.exportCsvButton")}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <Text className={`mb-2 text-sm font-semibold ${muted}`}>
+          {t("settings.importTitle")}
+        </Text>
+        <View className={`mb-6 rounded-xl border p-3 ${card}`}>
+          <Text className={`mb-3 text-xs ${muted}`}>
+            {t("settings.importDescription")}
+          </Text>
+          <Pressable
+            disabled={isWorking}
+            onPress={() => {
+              if (isWorking) return;
+              Alert.alert(
+                t("settings.importConfirmTitle"),
+                t("settings.importConfirmMessage"),
+                [
+                  { text: t("common.cancel"), style: "cancel" },
+                  {
+                    text: t("common.ok") ?? "OK",
+                    style: "destructive",
+                    onPress: async () => {
+                      setIsWorking(true);
+                      try {
+                        const result = await pickAndImportBackup();
+                        if (result.ok) {
+                          fetchActivePacts();
+                          Alert.alert(t("settings.importSuccess"));
+                        } else if (!result.cancelled) {
+                          Alert.alert(t("common.error"), t("settings.importError"));
+                        }
+                      } finally {
+                        setIsWorking(false);
+                      }
+                    },
+                  },
+                ],
+              );
+            }}
+            className={`rounded-lg py-3 ${
+              isWorking ? "bg-slate-400" : btnPrimary
+            }`}
+          >
+            <Text className="text-center text-sm font-semibold text-white">
+              {t("settings.importButton")}
+            </Text>
+          </Pressable>
+          {isWorking && (
+            <Text className={`mt-2 text-center text-xs ${muted}`}>
+              {t("common.loading")}
+            </Text>
+          )}
         </View>
 
         <View className="h-8" />

@@ -13,6 +13,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
 import { ChevronLeft, Plus } from "lucide-react-native";
 import { getPactById, updatePact } from "../../src/db/queries";
+import { usePactStore } from "../../src/store/usePactStore";
 import { DEFAULTS } from "../../src/constants";
 import { useTranslation } from "../../src/i18n/context";
 import { useTheme } from "../../src/contexts/ThemeContext";
@@ -88,6 +89,7 @@ export default function EditPactScreen() {
         goalDeadline: deadline ?? undefined,
         reminderTime: reminderTime || DEFAULTS.REMINDER_TIME,
       });
+      usePactStore.getState().fetchActivePacts();
       router.back();
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Unknown error";

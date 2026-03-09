@@ -85,7 +85,7 @@ will-of-fire/
 ├── app/                  # UI Screens (Expo Router)
 │   ├── (tabs)/           # Màn hình chính có Tab bar
 │   │   ├── index.tsx     # Dashboard (Danh sách Active Pacts)
-│   │   ├── reports.tsx   # Global Reports
+│   │   ├── reports.tsx   # Global Reports (Chỉ số Ý chí, Lửa, Goal đạt/sắp tới, biểu đồ, động viên)
 │   │   └── archive.tsx   # Archive (Completed & Failed)
 │   ├── pacts/            
 │   │   ├── [id].tsx      # Pact Detail
@@ -93,6 +93,8 @@ will-of-fire/
 │   │   └── edit.tsx      # Edit Pact Form
 │   └── _layout.tsx       # Root layout, setup Providers
 ├── src/
+│   ├── features/
+│   │   └── reports/      # Reports: reportsData, willIndex, encouragementQuotes
 │   ├── components/       # Reusable UI (Buttons, Cards, Progress Bars, Icons)
 │   ├── db/               # Local Database Layer
 │   │   ├── schema.ts     # Drizzle DB Schema definitions

@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { initializeDatabase } from "../src/db/migrate";
+import { usePactStore } from "../src/store/usePactStore";
+import { getAllPacts } from "../src/db/queries";
+import { runSeed } from "../src/db/seed";
 import { verifyInstallation } from "nativewind";
 import { ThemeProvider } from "../src/contexts/ThemeContext";
 import { I18nProvider } from "../src/i18n/context";
@@ -28,6 +31,10 @@ export default function RootLayout() {
     const setup = async () => {
       try {
         await initializeDatabase();
+        if (__DEV__ && getAllPacts().length === 0) {
+          runSeed();
+        }
+        usePactStore.getState().fetchActivePacts();
         setDbReady(true);
       } catch (err) {
         const message = err instanceof Error ? err.message : "Unknown error";

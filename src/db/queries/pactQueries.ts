@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { db } from "../client";
 import { pacts, type NewPact, type Pact } from "../schema";
 
@@ -41,6 +41,7 @@ export function getAllActivePacts(): Pact[] {
         .select()
         .from(pacts)
         .where(eq(pacts.status, "ACTIVE"))
+        .orderBy(desc(pacts.createdAt))
         .all();
 }
 

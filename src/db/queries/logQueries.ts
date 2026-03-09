@@ -1,4 +1,4 @@
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, gte, lte } from "drizzle-orm";
 import { db } from "../client";
 import { pactLogs, type NewPactLog, type PactLog } from "../schema";
 
@@ -70,4 +70,24 @@ export function getRecentLogs(pactId: string, limit: number = 2): PactLog[] {
         .orderBy(desc(pactLogs.date))
         .limit(limit)
         .all();
+}
+
+/**
+ * Lấy toàn bộ log trong khoảng ngày (YYYY-MM-DD).
+ * Dùng cho Reports: tính Lửa theo tuần/tháng, phân bố COMPLETE/PRESERVE/MISS.
+ */
+export function getLogsInDateRange(fromDate: string, toDate: string): PactLog[] {
+    return db
+        .select()
+        .from(pactLogs)
+        .where(and(gte(pactLogs.date, fromDate), lte(pactLogs.date, toDate)))
+        .orderBy(desc(pactLogs.date))
+        .all();
+}
+
+/**
+ * Lấy toàn bộ log (dùng cho Reports aggregation).
+ */
+export function getAllLogs(): PactLog[] {
+    return db.select().from(pactLogs).orderBy(desc(pactLogs.date)).all();
 }

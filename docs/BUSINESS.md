@@ -53,7 +53,7 @@ When the Progress Bar reaches 100% (Target met), a completion event is triggered
 ### 4. REPORTING & UI BUSINESS LOGIC
 * **Dashboard:** Displays only "Active" Pacts with Quick Action buttons (Complete/Preserve) that are only enabled on scheduled days.
 * **Pact Detail & Report:** Visualizes the Progress Bar, lists past Milestones, and displays a Calendar view color-coded by daily status (Complete, Preserve, Miss, Milestone achieved).
-* **Global Report:** Aggregates data across all Pacts: Total Active Pacts, Total Fire collected globally, Total Milestones achieved, and Perfect Pacts (0 Miss, 0 Preserve).
+* **Global Report (Reports screen):** Aggregates data across all Pacts: **Will Index** (0–100 score from pacts created, completion rate, active pacts, discipline average, recent Fire, fail/miss penalty); Total Fire (all-time and last 7/30 days); Goals achieved (milestones + completed pacts) and upcoming goals; most productive pacts, need attention (many misses), most delayed (many preserves); **Fire per week** chart; **Action breakdown** (Complete/Preserve/Miss) pie chart; encouraging quotes based on Will Index. Purpose: summarize the user's journey and provide positive psychological impact (motivation, reflection on achievements).
 * **Archive:** Segregates "Completed" Pacts (successes) and "Failed" Pacts (lessons learned).
 
 ---
@@ -109,5 +109,5 @@ Khi thanh Tiến trình đạt 100% (Hoàn thành Định mức), hệ thống k
 ### 4. LOGIC HIỂN THỊ & BÁO CÁO
 * **Màn hình chính (Dashboard):** Chỉ hiện các Khế Ước "Đang chạy" (Active). Nút thao tác (Complete/Preserve) chỉ sáng lên vào đúng ngày đến hạn.
 * **Chi tiết & Báo cáo cá nhân:** Hiển thị thanh Tiến trình, danh sách các Cột mốc (Milestones) đã đạt, và Lịch trực quan được chấm màu theo trạng thái ngày (Hoàn thành, Bảo toàn, Bỏ lỡ, Đạt Cột mốc).
-* **Báo cáo tổng (Global):** Gom data toàn app: Tổng Khế Ước đang chạy, Tổng Fire thu thập được, Tổng Cột mốc đã phá đảo, và Số Khế Ước hoàn hảo (Chưa từng Miss hay Preserve).
+* **Báo cáo tổng (Reports):** Gom data toàn app: **Chỉ số Ý chí** (điểm 0–100 từ số pact, tỷ lệ hoàn thành goal, pact đang chạy, độ kỷ luật TB, Lửa 30 ngày, trừ điểm fail/miss); Tổng Lửa (toàn thời gian và 7/30 ngày qua); Goal đã đạt và Goal sắp tới; Pact năng suất nhất, cần cải thiện (nhiều miss), trì hoãn nhiều (nhiều preserve); biểu đồ Lửa theo tuần và phân bố Complete/Preserve/Miss; lời động viên/quote theo điểm. Mục đích: tóm tắt hành trình và tạo hiệu ứng tâm lý tích cực (động lực, nhìn lại thành tựu).
 * **Kho lưu trữ (Archive):** Phân chia rõ ràng 2 khu vực: Chiến tích (Completed) và Bài học (Failed).

@@ -3,9 +3,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { Flame, Plus, ListChecks } from "lucide-react-native";
-import { useState, useCallback } from "react";
-import { getAllActivePacts } from "../../src/db/queries";
-import type { Pact } from "../../src/db/schema";
+import { useState, useCallback, useEffect } from "react";
+import { usePactStore } from "../../src/store/usePactStore";
 import { getProgressPercentage } from "../../src/utils/calendarRules";
 import { InProgressGradientBar } from "../../src/components/InProgressGradientBar";
 import { getNoGoalPhraseByIndex, NO_GOAL_PHRASE_COUNT } from "../../src/i18n/noGoalPhrases";
@@ -13,40 +12,34 @@ import { useTranslation } from "../../src/i18n/context";
 import { useTheme } from "../../src/contexts/ThemeContext";
 
 /**
- * Dashboard — Danh sách Active Pacts; điều hướng tới Tạo mới / Chi tiết.
+ * Dashboard — Danh sách Active Pacts từ Zustand store; điều hướng tới Tạo mới / Chi tiết.
  */
 export default function DashboardScreen() {
   const router = useRouter();
   const { t, locale } = useTranslation();
   const { isDark } = useTheme();
-  const [pactList, setPactList] = useState<Pact[]>([]);
+  const activePacts = usePactStore((s) => s.activePacts);
+  const fetchActivePacts = usePactStore((s) => s.fetchActivePacts);
   const [quoteIndices, setQuoteIndices] = useState<Record<string, number>>({});
-
-  const refreshList = useCallback(() => {
-    try {
-      const list = getAllActivePacts();
-      setPactList(list);
-      const noGoal = list.filter((p) => !p.goalName && !p.goalDeadline);
-      setQuoteIndices(
-        noGoal.reduce(
-          (acc, p) => ({
-            ...acc,
-            [p.id]: Math.floor(Math.random() * NO_GOAL_PHRASE_COUNT),
-          }),
-          {}
-        )
-      );
-    } catch {
-      setPactList([]);
-      setQuoteIndices({});
-    }
-  }, []);
 
   useFocusEffect(
     useCallback(() => {
-      refreshList();
-    }, [refreshList])
+      fetchActivePacts();
+    }, [fetchActivePacts])
   );
+
+  useEffect(() => {
+    const noGoal = activePacts.filter((p) => !p.goalName && !p.goalDeadline);
+    setQuoteIndices(
+      noGoal.reduce<Record<string, number>>(
+        (acc, p) => ({
+          ...acc,
+          [p.id]: Math.floor(Math.random() * NO_GOAL_PHRASE_COUNT),
+        }),
+        {}
+      )
+    );
+  }, [activePacts]);
 
   const bg = isDark ? "bg-slate-900" : "bg-slate-50";
   const card = isDark ? "bg-slate-800" : "bg-white border border-slate-200";
@@ -78,7 +71,7 @@ export default function DashboardScreen() {
             <Text className="ml-2 font-bold text-white">{t("dashboard.createPact")}</Text>
           </Pressable>
           <Pressable
-            onPress={refreshList}
+            onPress={fetchActivePacts}
             className={`flex-1 flex-row items-center justify-center rounded-xl ${btnSecondary} py-3 active:opacity-80`}
           >
             <ListChecks color={isDark ? "white" : "#0f172a"} size={18} />
@@ -87,16 +80,16 @@ export default function DashboardScreen() {
         </View>
 
         <Text className={`mb-3 text-lg font-semibold ${muted}`}>
-          {t("dashboard.activePacts")} ({pactList.length})
+          {t("dashboard.activePacts")} ({activePacts.length})
         </Text>
 
-        {pactList.length === 0 ? (
+        {activePacts.length === 0 ? (
           <View className={`items-center rounded-xl ${card} py-12`}>
             <Text className="text-5xl">📭</Text>
             <Text className={`mt-3 ${muted}`}>{t("dashboard.empty")}</Text>
           </View>
         ) : (
-          pactList.map((pact) => {
+          activePacts.map((pact) => {
             const hasGoal =
               !!pact.goalDeadline ||
               (pact.targetCount != null && pact.targetCount > 0);
