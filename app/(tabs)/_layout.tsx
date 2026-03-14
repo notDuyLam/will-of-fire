@@ -70,7 +70,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="archive"
         options={{
-          title: "Archive",
+          title: t("archive.title"),
           tabBarIcon: ({ color, size }) => (
             <Archive color={color} size={size} />
           ),

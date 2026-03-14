@@ -6,7 +6,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -20,12 +19,23 @@ import { useTheme } from "../../src/contexts/ThemeContext";
 import { DatePickerField } from "../../src/components/DatePickerField";
 import { TimePickerField } from "../../src/components/TimePickerField";
 import { PACT_FREQUENCIES, type PactFrequency } from "../../src/db/schema";
+import { ConfirmModal } from "../../src/components/ConfirmModal";
 
-const FREQUENCY_OPTIONS: { value: PactFrequency; labelKey: string; needsStart?: boolean; needsInterval?: boolean }[] = [
+const FREQUENCY_OPTIONS: {
+  value: PactFrequency;
+  labelKey: string;
+  needsStart?: boolean;
+  needsInterval?: boolean;
+}[] = [
   { value: "DAILY", labelKey: "frequency.daily" },
   { value: "EVERY_2_DAYS", labelKey: "frequency.every2", needsStart: true },
   { value: "EVERY_3_DAYS", labelKey: "frequency.every3", needsStart: true },
-  { value: "EVERY_X_DAYS", labelKey: "frequency.everyX", needsStart: true, needsInterval: true },
+  {
+    value: "EVERY_X_DAYS",
+    labelKey: "frequency.everyX",
+    needsStart: true,
+    needsInterval: true,
+  },
   { value: "WEEKLY", labelKey: "frequency.weekly", needsStart: true },
   { value: "MONTHLY", labelKey: "frequency.monthly", needsStart: true },
 ];
@@ -43,10 +53,24 @@ export default function CreatePactScreen() {
   const [scheduleStart, setScheduleStart] = useState<string | null>(null);
   const [reminderTime, setReminderTime] = useState(DEFAULTS.REMINDER_TIME);
   const [submitting, setSubmitting] = useState(false);
+  const [modal, setModal] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    buttons: {
+      text: string;
+      onPress?: () => void;
+      style?: "cancel" | "destructive" | "default";
+    }[];
+  }>({ visible: false, title: "", message: "", buttons: [] });
 
-  const intervalDays = frequency === "EVERY_X_DAYS" ? parseInt(intervalDaysStr, 10) : null;
-  const needsStart = FREQUENCY_OPTIONS.find((o) => o.value === frequency)?.needsStart ?? false;
-  const needsInterval = FREQUENCY_OPTIONS.find((o) => o.value === frequency)?.needsInterval ?? false;
+  const intervalDays =
+    frequency === "EVERY_X_DAYS" ? parseInt(intervalDaysStr, 10) : null;
+  const needsStart =
+    FREQUENCY_OPTIONS.find((o) => o.value === frequency)?.needsStart ?? false;
+  const needsInterval =
+    FREQUENCY_OPTIONS.find((o) => o.value === frequency)?.needsInterval ??
+    false;
 
   const isValid =
     name.trim().length > 0 &&
@@ -71,14 +95,21 @@ export default function CreatePactScreen() {
       router.back();
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Unknown error";
-      Alert.alert(t("common.error"), msg);
+      setModal({
+        visible: true,
+        title: t("common.error"),
+        message: msg,
+        buttons: [{ text: t("common.ok") }],
+      });
     } finally {
       setSubmitting(false);
     }
   };
 
   const bg = isDark ? "bg-slate-900" : "bg-slate-50";
-  const card = isDark ? "bg-slate-800 border-slate-600" : "bg-white border-slate-200";
+  const card = isDark
+    ? "bg-slate-800 border-slate-600"
+    : "bg-white border-slate-200";
   const text = isDark ? "text-white" : "text-slate-900";
   const muted = isDark ? "text-slate-400" : "text-slate-500";
   const btnPrimary = "bg-orange-500";
@@ -90,15 +121,26 @@ export default function CreatePactScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         className="flex-1"
       >
-        <ScrollView className="flex-1 px-4 pt-4" keyboardShouldPersistTaps="handled">
+        <ScrollView
+          className="flex-1 px-4 pt-4"
+          keyboardShouldPersistTaps="handled"
+        >
           <View className="mb-4 flex-row items-center">
-            <Pressable onPress={() => router.back()} className="mr-3 p-1" hitSlop={8}>
+            <Pressable
+              onPress={() => router.back()}
+              className="mr-3 p-1"
+              hitSlop={8}
+            >
               <ChevronLeft color={isDark ? "#F8FAFC" : "#0f172a"} size={24} />
             </Pressable>
-            <Text className={`text-xl font-bold ${text}`}>{t("pact.createTitle")}</Text>
+            <Text className={`text-xl font-bold ${text}`}>
+              {t("pact.createTitle")}
+            </Text>
           </View>
 
-          <Text className={`mb-1 text-sm font-medium ${muted}`}>{t("pact.name")} *</Text>
+          <Text className={`mb-1 text-sm font-medium ${muted}`}>
+            {t("pact.name")} *
+          </Text>
           <TextInput
             value={name}
             onChangeText={setName}
@@ -107,7 +149,9 @@ export default function CreatePactScreen() {
             className={`mb-4 rounded-xl border ${card} px-4 py-3 ${text}`}
           />
 
-          <Text className={`mb-1 text-sm font-medium ${muted}`}>{t("pact.description")}</Text>
+          <Text className={`mb-1 text-sm font-medium ${muted}`}>
+            {t("pact.description")}
+          </Text>
           <TextInput
             value={description}
             onChangeText={setDescription}
@@ -117,7 +161,9 @@ export default function CreatePactScreen() {
             multiline
           />
 
-          <Text className={`mb-1 text-sm font-medium ${muted}`}>{t("pact.frequency")} *</Text>
+          <Text className={`mb-1 text-sm font-medium ${muted}`}>
+            {t("pact.frequency")} *
+          </Text>
           <View className="mb-4 flex-row flex-wrap gap-2">
             {FREQUENCY_OPTIONS.map((opt) => (
               <Pressable
@@ -138,7 +184,9 @@ export default function CreatePactScreen() {
 
           {needsInterval && (
             <>
-              <Text className={`mb-1 text-sm font-medium ${muted}`}>{t("pact.everyXDays")} *</Text>
+              <Text className={`mb-1 text-sm font-medium ${muted}`}>
+                {t("pact.everyXDays")} *
+              </Text>
               <TextInput
                 value={intervalDaysStr}
                 onChangeText={setIntervalDaysStr}
@@ -152,7 +200,9 @@ export default function CreatePactScreen() {
 
           {needsStart && (
             <>
-              <Text className={`mb-1 text-sm font-medium ${muted}`}>{t("pact.scheduleStart")} *</Text>
+              <Text className={`mb-1 text-sm font-medium ${muted}`}>
+                {t("pact.scheduleStart")} *
+              </Text>
               <DatePickerField
                 value={scheduleStart}
                 onChange={setScheduleStart}
@@ -163,7 +213,9 @@ export default function CreatePactScreen() {
             </>
           )}
 
-          <Text className={`mb-1 text-sm font-medium ${muted}`}>{t("pact.goal")}</Text>
+          <Text className={`mb-1 text-sm font-medium ${muted}`}>
+            {t("pact.goal")}
+          </Text>
           <TextInput
             value={goalName}
             onChangeText={setGoalName}
@@ -172,7 +224,9 @@ export default function CreatePactScreen() {
             className={`mb-4 rounded-xl border ${card} px-4 py-3 ${text}`}
           />
 
-          <Text className={`mb-1 text-sm font-medium ${muted}`}>{t("pact.deadline")}</Text>
+          <Text className={`mb-1 text-sm font-medium ${muted}`}>
+            {t("pact.deadline")}
+          </Text>
           <DatePickerField
             value={deadline}
             onChange={setDeadline}
@@ -181,7 +235,9 @@ export default function CreatePactScreen() {
             isDark={isDark}
           />
 
-          <Text className={`mb-1 text-sm font-medium ${muted}`}>{t("pact.reminderTime")}</Text>
+          <Text className={`mb-1 text-sm font-medium ${muted}`}>
+            {t("pact.reminderTime")}
+          </Text>
           <TimePickerField
             value={reminderTime}
             onChange={setReminderTime}
@@ -207,6 +263,15 @@ export default function CreatePactScreen() {
           <View className="h-8" />
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <ConfirmModal
+        visible={modal.visible}
+        title={modal.title}
+        message={modal.message}
+        buttons={modal.buttons}
+        onRequestClose={() => setModal((m) => ({ ...m, visible: false }))}
+        isDark={isDark}
+      />
     </SafeAreaView>
   );
 }

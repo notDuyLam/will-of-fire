@@ -7,6 +7,8 @@ import { useState, useCallback, useEffect } from "react";
 import { usePactStore } from "../../src/store/usePactStore";
 import { getProgressPercentage } from "../../src/utils/calendarRules";
 import { InProgressGradientBar } from "../../src/components/InProgressGradientBar";
+import { AnimatedProgressBar } from "../../src/components/AnimatedProgressBar";
+import { AnimatedPressable } from "../../src/components/AnimatedPressable";
 import { getNoGoalPhraseByIndex, NO_GOAL_PHRASE_COUNT } from "../../src/i18n/noGoalPhrases";
 import { useTranslation } from "../../src/i18n/context";
 import { useTheme } from "../../src/contexts/ThemeContext";
@@ -63,20 +65,20 @@ export default function DashboardScreen() {
         </View>
 
         <View className="mb-4 flex-row gap-3">
-          <Pressable
+          <AnimatedPressable
             onPress={() => router.push("/pacts/create")}
-            className="flex-1 flex-row items-center justify-center rounded-xl bg-orange-500 py-3 active:opacity-80"
+            className="flex-1 flex-row items-center justify-center rounded-xl bg-orange-500 py-3"
           >
             <Plus color="white" size={18} />
             <Text className="ml-2 font-bold text-white">{t("dashboard.createPact")}</Text>
-          </Pressable>
-          <Pressable
+          </AnimatedPressable>
+          <AnimatedPressable
             onPress={fetchActivePacts}
-            className={`flex-1 flex-row items-center justify-center rounded-xl ${btnSecondary} py-3 active:opacity-80`}
+            className={`flex-1 flex-row items-center justify-center rounded-xl ${btnSecondary} py-3`}
           >
             <ListChecks color={isDark ? "white" : "#0f172a"} size={18} />
             <Text className={`ml-2 font-bold ${text}`}>{t("dashboard.refresh")}</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
 
         <Text className={`mb-3 text-lg font-semibold ${muted}`}>
@@ -97,10 +99,10 @@ export default function DashboardScreen() {
               ? getProgressPercentage(pact, pact.currentProgress)
               : 0;
             return (
-              <Pressable
+              <AnimatedPressable
                 key={pact.id}
                 onPress={() => router.push(`/pacts/${pact.id}`)}
-                className={`mb-3 rounded-xl ${card} p-4 active:opacity-90`}
+                className={`mb-3 rounded-xl ${card} p-4`}
               >
                 <View className="flex-row items-center justify-between">
                   <View className="flex-1">
@@ -125,10 +127,7 @@ export default function DashboardScreen() {
                 </View>
                 {hasGoal ? (
                   <View className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-700">
-                    <View
-                      className="h-full rounded-full bg-orange-500"
-                      style={{ width: `${Math.min(pct, 100)}%` }}
-                    />
+                    <AnimatedProgressBar progress={pct} height={6} />
                   </View>
                 ) : (
                   <View className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-700">
@@ -138,7 +137,7 @@ export default function DashboardScreen() {
                 <Text className={`mt-2 text-xs ${muted}`}>
                   {t("dashboard.tapToDetail")} • {pact.frequency} • Streak: {pact.currentStreak}
                 </Text>
-              </Pressable>
+              </AnimatedPressable>
             );
           })
         )}

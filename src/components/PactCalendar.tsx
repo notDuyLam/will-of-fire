@@ -12,6 +12,7 @@ import type { PactLog } from "../db/schema";
 import { isScheduledOn, getStartDate } from "../utils/calendarRules";
 import type { Pact } from "../db/schema";
 import { useTranslation } from "../i18n/context";
+import { GoalDayPulse } from "./GoalDayPulse";
 
 const WEEKDAYS = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 
@@ -107,22 +108,24 @@ export function PactCalendar({ pact, logs, months = 2, isDark = true }: PactCale
                     className="w-[14.28%] aspect-square p-0.5"
                     style={{ minWidth: "14.28%" }}
                   >
-                    <View
-                      className={`h-full w-full items-center justify-center rounded ${cellBg(
-                        dateStr,
-                        action
-                      )} ${isToday ? "ring-1 ring-orange-400" : ""} ${
-                        isGoalDay(dateStr) ? "ring-2 ring-amber-400" : ""
-                      }`}
-                    >
-                      <Text
-                        className={`text-[10px] font-medium ${
-                          action ? "text-white" : isDark ? "text-slate-400" : "text-slate-600"
+                    <GoalDayPulse pulse={isGoalDay(dateStr) && !action}>
+                      <View
+                        className={`h-full w-full items-center justify-center rounded ${cellBg(
+                          dateStr,
+                          action
+                        )} ${isToday ? "ring-1 ring-orange-400" : ""} ${
+                          isGoalDay(dateStr) ? "ring-2 ring-amber-400" : ""
                         }`}
                       >
-                        {format(d, "d")}
-                      </Text>
-                    </View>
+                        <Text
+                          className={`text-[10px] font-medium ${
+                            action ? "text-white" : isDark ? "text-slate-400" : "text-slate-600"
+                          }`}
+                        >
+                          {format(d, "d")}
+                        </Text>
+                      </View>
+                    </GoalDayPulse>
                   </View>
                 );
               })}

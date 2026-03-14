@@ -158,6 +158,18 @@ export interface ImportResult {
   errorMessage?: string;
 }
 
+/**
+ * Xóa toàn bộ dữ liệu app (pacts, pact_logs, milestones).
+ * Dùng cho chức năng Reset app trong Settings.
+ */
+export function resetAppData(): void {
+  db.transaction((tx) => {
+    tx.delete(pactLogs).run();
+    tx.delete(milestones).run();
+    tx.delete(pacts).run();
+  });
+}
+
 export async function pickAndImportBackup(): Promise<ImportResult> {
   try {
     const result = await DocumentPicker.getDocumentAsync({

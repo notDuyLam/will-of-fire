@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView } from "react-native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "../../src/i18n/context";
@@ -9,7 +9,12 @@ import {
   saveAndShareJsonBackup,
   saveAndShareCsvSummary,
   pickAndImportBackup,
+  resetAppData,
 } from "../../src/db/backup";
+import {
+  ConfirmModal,
+  type ConfirmModalButton,
+} from "../../src/components/ConfirmModal";
 
 /**
  * Màn hình Cài đặt: đổi theme (sáng/tối), đổi ngôn ngữ.
@@ -19,9 +24,19 @@ export default function SettingsScreen() {
   const { theme, setTheme, isDark } = useTheme();
   const { fetchActivePacts } = usePactStore();
   const [isWorking, setIsWorking] = useState(false);
+  const [modal, setModal] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    buttons: ConfirmModalButton[];
+  }>({ visible: false, title: "", message: "", buttons: [] });
+
+  const closeModal = () => setModal((m) => ({ ...m, visible: false }));
 
   const bg = isDark ? "bg-slate-900" : "bg-slate-50";
-  const card = isDark ? "bg-slate-800 border-slate-600" : "bg-white border-slate-200";
+  const card = isDark
+    ? "bg-slate-800 border-slate-600"
+    : "bg-white border-slate-200";
   const text = isDark ? "text-white" : "text-slate-900";
   const muted = isDark ? "text-slate-400" : "text-slate-500";
   const btnPrimary = "bg-orange-500";
@@ -113,7 +128,12 @@ export default function SettingsScreen() {
                 try {
                   await saveAndShareJsonBackup(locale);
                 } catch {
-                  Alert.alert(t("common.error"), t("settings.importError"));
+                  setModal({
+                    visible: true,
+                    title: t("common.error"),
+                    message: t("settings.importError"),
+                    buttons: [{ text: t("common.ok") }],
+                  });
                 } finally {
                   setIsWorking(false);
                 }
@@ -134,7 +154,12 @@ export default function SettingsScreen() {
                 try {
                   await saveAndShareCsvSummary();
                 } catch {
-                  Alert.alert(t("common.error"), t("settings.importError"));
+                  setModal({
+                    visible: true,
+                    title: t("common.error"),
+                    message: t("settings.importError"),
+                    buttons: [{ text: t("common.ok") }],
+                  });
                 } finally {
                   setIsWorking(false);
                 }
@@ -165,13 +190,14 @@ export default function SettingsScreen() {
             disabled={isWorking}
             onPress={() => {
               if (isWorking) return;
-              Alert.alert(
-                t("settings.importConfirmTitle"),
-                t("settings.importConfirmMessage"),
-                [
+              setModal({
+                visible: true,
+                title: t("settings.importConfirmTitle"),
+                message: t("settings.importConfirmMessage"),
+                buttons: [
                   { text: t("common.cancel"), style: "cancel" },
                   {
-                    text: t("common.ok") ?? "OK",
+                    text: t("common.ok"),
                     style: "destructive",
                     onPress: async () => {
                       setIsWorking(true);
@@ -179,9 +205,19 @@ export default function SettingsScreen() {
                         const result = await pickAndImportBackup();
                         if (result.ok) {
                           fetchActivePacts();
-                          Alert.alert(t("settings.importSuccess"));
+                          setModal({
+                            visible: true,
+                            title: "",
+                            message: t("settings.importSuccess"),
+                            buttons: [{ text: t("common.ok") }],
+                          });
                         } else if (!result.cancelled) {
-                          Alert.alert(t("common.error"), t("settings.importError"));
+                          setModal({
+                            visible: true,
+                            title: t("common.error"),
+                            message: t("settings.importError"),
+                            buttons: [{ text: t("common.ok") }],
+                          });
                         }
                       } finally {
                         setIsWorking(false);
@@ -189,7 +225,7 @@ export default function SettingsScreen() {
                     },
                   },
                 ],
-              );
+              });
             }}
             className={`rounded-lg py-3 ${
               isWorking ? "bg-slate-400" : btnPrimary
@@ -206,8 +242,66 @@ export default function SettingsScreen() {
           )}
         </View>
 
+        <Text className={`mb-2 text-sm font-semibold ${muted}`}>
+          {t("settings.resetTitle")}
+        </Text>
+        <View className={`mb-6 rounded-xl border p-3 ${card}`}>
+          <Text className={`mb-3 text-xs ${muted}`}>
+            {t("settings.resetDescription")}
+          </Text>
+          <Pressable
+            disabled={isWorking}
+            onPress={() => {
+              if (isWorking) return;
+              setModal({
+                visible: true,
+                title: t("settings.resetConfirmTitle"),
+                message: t("settings.resetConfirmMessage"),
+                buttons: [
+                  { text: t("common.cancel"), style: "cancel" },
+                  {
+                    text: t("settings.resetButton"),
+                    style: "destructive",
+                    onPress: () => {
+                      setIsWorking(true);
+                      try {
+                        resetAppData();
+                        fetchActivePacts();
+                        setModal({
+                          visible: true,
+                          title: "",
+                          message: t("settings.resetSuccess"),
+                          buttons: [{ text: t("common.ok") }],
+                        });
+                      } finally {
+                        setIsWorking(false);
+                      }
+                    },
+                  },
+                ],
+              });
+            }}
+            className={`rounded-lg py-3 ${
+              isWorking ? "bg-slate-400" : "bg-red-600"
+            }`}
+          >
+            <Text className="text-center text-sm font-semibold text-white">
+              {t("settings.resetButton")}
+            </Text>
+          </Pressable>
+        </View>
+
         <View className="h-8" />
       </ScrollView>
+
+      <ConfirmModal
+        visible={modal.visible}
+        title={modal.title}
+        message={modal.message}
+        buttons={modal.buttons}
+        onRequestClose={closeModal}
+        isDark={isDark}
+      />
     </SafeAreaView>
   );
 }
