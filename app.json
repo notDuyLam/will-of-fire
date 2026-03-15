@@ -22,7 +22,8 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.notduylam.willoffire"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -38,6 +39,12 @@
         }
       ],
       "@react-native-community/datetimepicker"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e095e17a-3b55-4add-85f0-b926acfc1245"
+      }
+    }
   }
 }
