@@ -3,7 +3,6 @@ import { pacts, pactLogs, milestones, type Pact, type PactLog, type Milestone } 
 import type { Locale } from "../i18n/translations";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
-import * as DocumentPicker from "expo-document-picker";
 
 export interface BackupPayload {
   version: string;
@@ -171,36 +170,7 @@ export function resetAppData(): void {
 }
 
 export async function pickAndImportBackup(): Promise<ImportResult> {
-  try {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: ["application/json", "text/*"],
-      copyToCacheDirectory: true,
-    });
-
-    if (result.canceled) {
-      return { ok: false, cancelled: true };
-    }
-
-    const asset = result.assets?.[0];
-    if (!asset?.uri) {
-      return { ok: false, errorMessage: "NO_FILE_URI" };
-    }
-
-    const content = await FileSystem.readAsStringAsync(asset.uri, {
-      encoding: FileSystem.EncodingType.UTF8,
-    });
-
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(content);
-    } catch {
-      return { ok: false, errorMessage: "INVALID_JSON" };
-    }
-
-    importBackup(parsed as BackupPayload);
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, errorMessage: (e as Error).message ?? "UNKNOWN_ERROR" };
-  }
+  // Phase 1: Import backup tạm thời bị vô hiệu hóa để tránh phụ thuộc expo-document-picker gây lỗi build.
+  return { ok: false, cancelled: true };
 }
 
