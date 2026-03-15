@@ -20,6 +20,7 @@ import { DatePickerField } from "../../src/components/DatePickerField";
 import { TimePickerField } from "../../src/components/TimePickerField";
 import { PACT_FREQUENCIES, type PactFrequency } from "../../src/db/schema";
 import { ConfirmModal } from "../../src/components/ConfirmModal";
+import { schedulePactReminders } from "../../src/utils/notifications";
 
 const FREQUENCY_OPTIONS: {
   value: PactFrequency;
@@ -92,6 +93,9 @@ export default function CreatePactScreen() {
         reminderTime: reminderTime || DEFAULTS.REMINDER_TIME,
       });
       usePactStore.getState().fetchActivePacts();
+      if (Platform.OS !== "web") {
+        void schedulePactReminders();
+      }
       router.back();
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Unknown error";

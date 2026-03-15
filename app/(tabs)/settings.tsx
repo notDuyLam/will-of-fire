@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView, Platform } from "react-native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "../../src/i18n/context";
@@ -15,6 +15,7 @@ import {
   ConfirmModal,
   type ConfirmModalButton,
 } from "../../src/components/ConfirmModal";
+import { scheduleTestNotification } from "../../src/utils/notifications";
 
 /**
  * Màn hình Cài đặt: đổi theme (sáng/tối), đổi ngôn ngữ.
@@ -108,6 +109,49 @@ export default function SettingsScreen() {
               }`}
             >
               {t("settings.languageEn")}
+            </Text>
+          </Pressable>
+        </View>
+
+        <Text className={`mb-2 text-sm font-semibold ${muted}`}>
+          {t("settings.notificationsSection")}
+        </Text>
+        <View className={`mb-6 rounded-xl border p-3 ${card}`}>
+          <Pressable
+            onPress={async () => {
+              if (Platform.OS === "web") {
+                setModal({
+                  visible: true,
+                  title: t("settings.notificationsSection"),
+                  message:
+                    locale === "vi"
+                      ? "Thông báo thử chỉ hoạt động trên thiết bị thật (Android/iOS)."
+                      : "Test notification only works on a real device (Android/iOS).",
+                  buttons: [{ text: t("common.ok") }],
+                });
+                return;
+              }
+              try {
+                await scheduleTestNotification(locale as "vi" | "en");
+                setModal({
+                  visible: true,
+                  title: "",
+                  message: t("settings.testNotificationScheduled"),
+                  buttons: [{ text: t("common.ok") }],
+                });
+              } catch {
+                setModal({
+                  visible: true,
+                  title: t("common.error"),
+                  message: t("common.error"),
+                  buttons: [{ text: t("common.ok") }],
+                });
+              }
+            }}
+            className={`rounded-lg py-3 ${btnPrimary}`}
+          >
+            <Text className="text-center text-sm font-semibold text-white">
+              {t("settings.testNotificationButton")}
             </Text>
           </Pressable>
         </View>

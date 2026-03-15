@@ -9,7 +9,10 @@ import { getProgressPercentage } from "../../src/utils/calendarRules";
 import { InProgressGradientBar } from "../../src/components/InProgressGradientBar";
 import { AnimatedProgressBar } from "../../src/components/AnimatedProgressBar";
 import { AnimatedPressable } from "../../src/components/AnimatedPressable";
-import { getNoGoalPhraseByIndex, NO_GOAL_PHRASE_COUNT } from "../../src/i18n/noGoalPhrases";
+import {
+  getNoGoalPhraseByIndex,
+  NO_GOAL_PHRASE_COUNT,
+} from "../../src/i18n/noGoalPhrases";
 import { useTranslation } from "../../src/i18n/context";
 import { useTheme } from "../../src/contexts/ThemeContext";
 
@@ -27,7 +30,7 @@ export default function DashboardScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchActivePacts();
-    }, [fetchActivePacts])
+    }, [fetchActivePacts]),
   );
 
   useEffect(() => {
@@ -38,8 +41,8 @@ export default function DashboardScreen() {
           ...acc,
           [p.id]: Math.floor(Math.random() * NO_GOAL_PHRASE_COUNT),
         }),
-        {}
-      )
+        {},
+      ),
     );
   }, [activePacts]);
 
@@ -69,15 +72,23 @@ export default function DashboardScreen() {
             onPress={() => router.push("/pacts/create")}
             className="flex-1 flex-row items-center justify-center rounded-xl bg-orange-500 py-3"
           >
-            <Plus color="white" size={18} />
-            <Text className="ml-2 font-bold text-white">{t("dashboard.createPact")}</Text>
+            <View className="shrink-0 flex-row items-center">
+              <Plus color="white" size={18} />
+              <Text className="ml-2 shrink-0 font-bold text-white" numberOfLines={1}>
+                {t("dashboard.createPact")}
+              </Text>
+            </View>
           </AnimatedPressable>
           <AnimatedPressable
             onPress={fetchActivePacts}
             className={`flex-1 flex-row items-center justify-center rounded-xl ${btnSecondary} py-3`}
           >
-            <ListChecks color={isDark ? "white" : "#0f172a"} size={18} />
-            <Text className={`ml-2 font-bold ${text}`}>{t("dashboard.refresh")}</Text>
+            <View className="shrink-0 flex-row items-center">
+              <ListChecks color={isDark ? "white" : "#0f172a"} size={18} />
+              <Text className={`ml-2 shrink-0 font-bold ${text}`} numberOfLines={1}>
+                {t("dashboard.refresh")}
+              </Text>
+            </View>
           </AnimatedPressable>
         </View>
 
@@ -106,9 +117,16 @@ export default function DashboardScreen() {
               >
                 <View className="flex-row items-center justify-between">
                   <View className="flex-1">
-                    <Text className={`text-base font-bold ${text}`}>{pact.name}</Text>
+                    <Text className={`text-base font-bold ${text}`}>
+                      {pact.name}
+                    </Text>
                     <Text className={`mt-1 text-xs ${muted}`}>
-                      {pact.goalName ? pact.goalName : getNoGoalPhraseByIndex(locale, quoteIndices[pact.id] ?? 0)}
+                      {pact.goalName
+                        ? pact.goalName
+                        : getNoGoalPhraseByIndex(
+                            locale,
+                            quoteIndices[pact.id] ?? 0,
+                          )}
                     </Text>
                   </View>
                   <View className="items-end">
@@ -121,7 +139,9 @@ export default function DashboardScreen() {
                     {hasGoal ? (
                       <Text className={`mt-1 text-xs ${muted}`}>{pct}%</Text>
                     ) : (
-                      <Text className={`mt-1 text-xs ${muted}`}>{t("detail.inProgress")}</Text>
+                      <Text className={`mt-1 text-xs ${muted}`}>
+                        {t("detail.inProgress")}
+                      </Text>
                     )}
                   </View>
                 </View>
@@ -131,11 +151,16 @@ export default function DashboardScreen() {
                   </View>
                 ) : (
                   <View className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-700">
-                    <InProgressGradientBar seed={pact.id} height={6} widthFraction={0.5} />
+                    <InProgressGradientBar
+                      seed={pact.id}
+                      height={6}
+                      widthFraction={0.5}
+                    />
                   </View>
                 )}
                 <Text className={`mt-2 text-xs ${muted}`}>
-                  {t("dashboard.tapToDetail")} • {pact.frequency} • Streak: {pact.currentStreak}
+                  {t("dashboard.tapToDetail")} • {pact.frequency} • Streak:{" "}
+                  {pact.currentStreak}
                 </Text>
               </AnimatedPressable>
             );

@@ -14,11 +14,12 @@ import {
   getPactById,
   getLogsForPact,
   getLogForDate,
+  getMilestonesForPact,
   logActionAndUpdatePact,
   updatePact,
   createMilestone,
 } from "../../src/db/queries";
-import type { Pact, PactLog } from "../../src/db/schema";
+import type { Pact, PactLog, Milestone } from "../../src/db/schema";
 import { usePactStore } from "../../src/store/usePactStore";
 import {
   isScheduledOn,
@@ -71,6 +72,7 @@ export default function PactDetailScreen() {
   const { isDark } = useTheme();
   const [pact, setPact] = useState<Pact | null>(null);
   const [logs, setLogs] = useState<PactLog[]>([]);
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [evolutionModal, setEvolutionModal] = useState(false);
   const [evolveGoalName, setEvolveGoalName] = useState("");
   const [evolveDeadline, setEvolveDeadline] = useState<string | null>(null);
@@ -107,7 +109,10 @@ export default function PactDetailScreen() {
     if (!id) return;
     const p = getPactById(id);
     setPact(p ?? null);
-    if (p) setLogs(getLogsForPact(p.id));
+    if (p) {
+      setLogs(getLogsForPact(p.id));
+      setMilestones(getMilestonesForPact(p.id));
+    }
   }, [id]);
 
   useEffect(() => {
@@ -210,6 +215,12 @@ export default function PactDetailScreen() {
   };
 
   const handleArchive = () => {
+    // Ghi nhận goal vừa đạt thành milestone (giống Evolve) để Pact Detail luôn có danh sách cột mốc
+    createMilestone({
+      pactId: pact.id,
+      goalName: (pact.goalName || pact.name).trim(),
+      goalDeadline: pact.goalDeadline ?? undefined,
+    });
     updatePact(pact.id, { status: "COMPLETED" });
     usePactStore.getState().fetchActivePacts();
     setEvolutionModal(false);
@@ -348,6 +359,83 @@ export default function PactDetailScreen() {
             </>
           )}
         </View>
+
+        <Text className={`mb-3 font-medium ${muted}`}>
+          {t("detail.milestonesTitle")}
+        </Text>
+        {milestones.length === 0 ? (
+          pact.status === "COMPLETED" && (pact.goalName || pact.goalDeadline) ? (
+            <View className="mb-4 flex-row">
+              <View className="w-5 items-center">
+                <View
+                  className={`h-3 w-3 rounded-full ${
+                    isDark ? "bg-emerald-500" : "bg-emerald-400"
+                  }`}
+                />
+              </View>
+              <View
+                className={`ml-2 flex-1 rounded-xl border-l-2 border-emerald-400/50 pl-4 py-3 pr-3 ${
+                  isDark ? "bg-emerald-500/10" : "bg-emerald-50"
+                }`}
+              >
+                <Text className={`font-medium ${text}`} numberOfLines={1}>
+                  {pact.goalName || pact.name}
+                </Text>
+                <Text className={`mt-0.5 text-xs ${muted}`}>
+                  {locale === "vi" ? "Đã lưu trữ" : "Archived"}
+                </Text>
+              </View>
+            </View>
+          ) : (
+            <View className={`mb-4 rounded-xl ${card} py-6`}>
+              <Text className={`text-center ${muted}`}>
+                {t("detail.noMilestones")}
+              </Text>
+            </View>
+          )
+        ) : (
+          <View className="mb-4">
+            {milestones.map((m, index) => {
+              const isFirst = index === 0;
+              const isLast = index === milestones.length - 1;
+              const dateStr = new Date(m.achievedAt).toLocaleDateString(
+                locale === "vi" ? "vi-VN" : "en-GB",
+                { day: "numeric", month: "short", year: "numeric" }
+              );
+              const trackColor = isDark ? "bg-slate-600" : "bg-slate-200";
+              const dotGreen = isDark ? "bg-emerald-400" : "bg-emerald-500";
+              const cardGreen = isDark
+                ? "border-emerald-400/50 bg-emerald-500/10"
+                : "border-emerald-400/60 bg-emerald-50";
+              const lineGreen = isDark ? "bg-emerald-400/60" : "bg-emerald-400";
+              return (
+                <View key={m.id} className="flex-row">
+                  <View className="w-5 items-center">
+                    {!isFirst && (
+                      <View className={trackColor} style={{ width: 2, flex: 1 }} />
+                    )}
+                    <View className="items-center justify-center" style={{ minHeight: 48 }}>
+                      <View className={`h-3.5 w-3.5 rounded-full ${dotGreen}`} />
+                    </View>
+                    {!isLast && (
+                      <View className={trackColor} style={{ width: 2, flex: 1 }} />
+                    )}
+                  </View>
+                  <View
+                    className={`mb-2 ml-2 flex-1 rounded-r-xl border-l-2 pl-4 pr-3 py-3 ${cardGreen}`}
+                  >
+                    <Text className={`font-medium ${text}`} numberOfLines={2}>
+                      {m.goalName}
+                    </Text>
+                    <Text className={`mt-1.5 text-xs ${muted}`}>
+                      {dateStr}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        )}
 
         <PactCalendar pact={pact} logs={logs} months={2} isDark={isDark} />
 

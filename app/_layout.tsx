@@ -1,7 +1,7 @@
 import "../global.css";
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator } from "react-native";
+import { View, Text, ActivityIndicator, Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { initializeDatabase } from "../src/db/migrate";
 import { usePactStore } from "../src/store/usePactStore";
@@ -11,6 +11,11 @@ import { verifyInstallation } from "nativewind";
 import { ThemeProvider } from "../src/contexts/ThemeContext";
 import { I18nProvider } from "../src/i18n/context";
 import { ThemeAwareBars } from "../src/components/ThemeAwareBars";
+import {
+  setupNotificationHandler,
+  requestPermissionsAsync,
+  schedulePactReminders,
+} from "../src/utils/notifications";
 
 /**
  * Root Layout: Thiết lập Providers và navigation container chính.
@@ -35,6 +40,13 @@ export default function RootLayout() {
           runSeed();
         }
         usePactStore.getState().fetchActivePacts();
+
+        if (Platform.OS !== "web") {
+          setupNotificationHandler();
+          await requestPermissionsAsync();
+          await schedulePactReminders();
+        }
+
         setDbReady(true);
       } catch (err) {
         const message = err instanceof Error ? err.message : "Unknown error";

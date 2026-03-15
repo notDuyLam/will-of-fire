@@ -158,8 +158,7 @@ export default function ReportsScreen() {
   const score = indexResult.score;
   const encouragement = getEncouragementForScore(score, locale as "vi" | "en");
 
-  const goalsAchievedCount =
-    data.recentMilestones.length + data.completedPacts.length;
+  const goalsAchievedCount = data.goalsAchievedCount;
   const totalActions =
     data.actionCounts.complete +
     data.actionCounts.preserve +
@@ -303,10 +302,9 @@ export default function ReportsScreen() {
           >
             {goalsAchievedCount}
           </Text>
-          {data.recentMilestones.length > 0 ||
-          data.completedPacts.length > 0 ? (
+          {data.recentMilestones.length > 0 ? (
             <View className="mt-4 gap-3">
-              {data.recentMilestones.slice(0, 3).map((m) => (
+              {data.recentMilestones.slice(0, 5).map((m) => (
                 <View
                   key={m.id}
                   className={`rounded-xl p-3 ${
@@ -321,21 +319,6 @@ export default function ReportsScreen() {
                   <Text className={`mt-0.5 text-xs ${muted}`}>
                     {formatAchievedAt(m.achievedAt)}
                   </Text>
-                </View>
-              ))}
-              {data.completedPacts.slice(0, 2).map((p) => (
-                <View
-                  key={p.id}
-                  className={`rounded-xl p-3 ${
-                    isDark
-                      ? "bg-emerald-500/15 border border-emerald-400/30"
-                      : "bg-emerald-100 border border-emerald-300"
-                  }`}
-                >
-                  <Text className={`font-semibold ${text}`} numberOfLines={1}>
-                    {p.goalName || p.name}
-                  </Text>
-                  <Text className={`mt-0.5 text-xs ${muted}`}>Completed</Text>
                 </View>
               ))}
             </View>

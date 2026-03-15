@@ -6,6 +6,8 @@ import {
   getFailedPacts,
   getLogsInDateRange,
   getAllMilestones,
+  getTotalMilestoneCount,
+  getMilestonesForPact,
   getAllLogs,
 } from "../../db/queries";
 import type { Pact, PactLog, Milestone } from "../../db/schema";
@@ -40,6 +42,10 @@ export interface ReportsData {
   upcomingGoals: Pact[];
   /** Milestones gần nhất (limit 10) */
   recentMilestones: Milestone[];
+  /** Tổng số milestone */
+  totalMilestoneCount: number;
+  /** Số goal đã đạt = milestone + completed pacts chưa có milestone (dữ liệu cũ) */
+  goalsAchievedCount: number;
   /** Thống kê log theo từng pact (trong 30 ngày) */
   pactLogStats: PactLogStats[];
   /** Tổng COMPLETE / PRESERVE / MISS trong 30 ngày (cho biểu đồ tròn) */
@@ -74,6 +80,12 @@ export function getReportsData(): ReportsData {
   const logs30 = getLogsInDateRange(from30, todayStr);
   const logs7 = getLogsInDateRange(from7, todayStr);
   const recentMilestones = getAllMilestones(10);
+  const totalMilestoneCount = getTotalMilestoneCount();
+  const completedPactsWithoutMilestone = completedPacts.filter(
+    (p) => getMilestonesForPact(p.id).length === 0
+  ).length;
+  const goalsAchievedCount =
+    totalMilestoneCount + completedPactsWithoutMilestone;
 
   const totalFire = allPacts.reduce((sum, p) => sum + (p.totalFire ?? 0), 0);
   const fireLast7Days = logs7.reduce((sum, l) => sum + (l.fireEarned ?? 0), 0);
@@ -128,6 +140,8 @@ export function getReportsData(): ReportsData {
     failedPacts,
     upcomingGoals,
     recentMilestones,
+    totalMilestoneCount,
+    goalsAchievedCount,
     pactLogStats,
     actionCounts,
     firePerWeek,

@@ -133,7 +133,55 @@ export function runSeed(): { pactsCreated: number; logsCreated: number; mileston
   toComplete.forEach((p) => updatePact(p.id, { status: "COMPLETED" }));
   toFail.forEach((p) => updatePact(p.id, { status: "FAILED" }));
 
-  let milestonesCount = 0;
+  // Pact ACTIVE có sẵn milestone (đã "Tiến hóa") — để test màn Detail hiển thị Cột mốc đã đạt
+  const evolvedStart = subDays(TODAY, 45);
+  const evolvedPact = createPact({
+    name: "Khế ước đã tiến hóa (test)",
+    description: "Seed: pact đang ACTIVE nhưng đã có milestone từ goal cũ.",
+    frequency: "DAILY",
+    scheduleStartDate: format(evolvedStart, "yyyy-MM-dd"),
+    goalName: "Mục tiêu hiện tại (chặng 2)",
+    goalDeadline: format(addDays(TODAY, 60), "yyyy-MM-dd"),
+    reminderTime: "07:30",
+  });
+  created.push(evolvedPact);
+  for (let d = 0; d < 30; d++) {
+    const dateStr = format(addDays(evolvedStart, d), "yyyy-MM-dd");
+    if (dateStr >= TODAY_STR) break;
+    logAction({
+      pactId: evolvedPact.id,
+      date: dateStr,
+      action: "COMPLETE",
+      fireEarned: 1,
+    });
+    logsCount++;
+  }
+  const evolvedLogs = getLogsForPact(evolvedPact.id);
+  updatePact(evolvedPact.id, {
+    totalFire: evolvedLogs.length,
+    currentProgress: evolvedLogs.filter((l) => l.action === "COMPLETE").length,
+    currentStreak: 5,
+    highestStreak: 10,
+  });
+  const evolvedMilestoneGoals = [
+    { name: "Mục tiêu chặng 5 (đã đạt)", daysAgo: 5 },
+    { name: "Mục tiêu chặng 4 (đã đạt)", daysAgo: 15 },
+    { name: "Mục tiêu chặng 3 (đã đạt)", daysAgo: 25 },
+    { name: "Mục tiêu chặng 2 (đã đạt)", daysAgo: 35 },
+    { name: "Mục tiêu chặng 1 (đã đạt)", daysAgo: 42 },
+    { name: "Mục tiêu chặng 0 (đầu tiên)", daysAgo: 45 },
+  ];
+  for (const { name, daysAgo } of evolvedMilestoneGoals) {
+    const achievedAt = subDays(TODAY, daysAgo);
+    createMilestone({
+      pactId: evolvedPact.id,
+      goalName: name,
+      goalDeadline: format(subDays(achievedAt, 1), "yyyy-MM-dd"),
+      achievedAt: achievedAt.toISOString(),
+    });
+  }
+  let milestonesCount = 6;
+
   const milestoneGoals = [
     "Đọc 6 cuốn",
     "Chạy 10km",
