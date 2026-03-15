@@ -51,7 +51,7 @@ export default function CreatePactScreen() {
   const [goalName, setGoalName] = useState("");
   const [deadline, setDeadline] = useState<string | null>(null);
   const [scheduleStart, setScheduleStart] = useState<string | null>(null);
-  const [reminderTime, setReminderTime] = useState(DEFAULTS.REMINDER_TIME);
+  const [reminderTime, setReminderTime] = useState<string>(DEFAULTS.REMINDER_TIME);
   const [submitting, setSubmitting] = useState(false);
   const [modal, setModal] = useState<{
     visible: boolean;
