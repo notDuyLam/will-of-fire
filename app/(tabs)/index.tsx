@@ -60,11 +60,6 @@ export default function DashboardScreen() {
           <Text className={`ml-2 text-2xl font-bold ${text}`}>
             {t("dashboard.title")}
           </Text>
-          <View className="ml-auto rounded-full bg-amber-500/20 px-3 py-1">
-            <Text className="text-xs font-semibold text-amber-400">
-              Phase 3
-            </Text>
-          </View>
         </View>
 
         <View className="mb-4 flex-row gap-3">
